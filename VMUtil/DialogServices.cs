@@ -43,6 +43,10 @@ namespace VMUtil {
             return new Ref<T> { Value = value};
         }
 
+        /// <summary>
+        /// Allows wrapping a generic Action method into what is expected from
+        /// SendOrPostCallback while avoiding variable capture.
+        /// </summary>
         private static void SyncMessage<T>(object messageState){
             var message = (Tuple<Action<T>, T>)messageState;
             message.Item1(message.Item2);
@@ -112,11 +116,6 @@ namespace VMUtil {
         /// a simple message dialog when code without knowledge of the user interface
         /// needs to display a message.
         /// </remarks>
-        /// <example>
-        /// <code lang="C#">
-        /// DialogServices.RegisterMessageDialog(MessageBox.Show);
-        /// </code>
-        /// </example>
         public static void RegisterMessageDialog(Action<string, string> message) {
             _ShowMessage = message;
         }
@@ -129,18 +128,62 @@ namespace VMUtil {
 
         private static Func<string, string, SimpleBooleanDialogStyle, bool> _SimpleBooleanDialog;
 
+        /// <summary>
+        /// Displays a message while allowing the choice one of two responses,
+        /// typically representing acceptance or rejection.
+        /// </summary>
+        /// <param name="message">The message to display.</param>
+        /// <returns>True if accepted, false otherwise.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// A dialog handler has not been registered.
+        /// </exception>
         public static bool SimpleBooleanDialog(string message) {
             return SimpleBooleanDialog(message, string.Empty, SimpleBooleanDialogStyle.OkCancel);
         }
 
+        /// <summary>
+        /// Displays a message with a title while allowing the choice of one of
+        /// two responses, typically representing acceptance or rejection.
+        /// </summary>
+        /// <param name="message">The message to display.</param>
+        /// <param name="title">The title for the dialog.</param>
+        /// <returns>True if accepted, false otherwise.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// A dialog handler has not been registered.
+        /// </exception>
         public static bool SimpleBooleanDialog(string message, string title) {
             return SimpleBooleanDialog(message, title, SimpleBooleanDialogStyle.OkCancel);
         }
 
+        /// <summary>
+        /// Displays a message allowing the choice of two responses as dictated
+        /// by the dialogStyle parameter.
+        /// </summary>
+        /// <param name="message">The message to display.</param>
+        /// <param name="dialogStyle">
+        /// A SimpleBooleanDialogStyle that determines which choices appear.
+        /// </param>
+        /// <returns>True if accepted, false otherwise.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// A dialog handler has not been registered.
+        /// </exception>
         public static bool SimpleBooleanDialog(string message, SimpleBooleanDialogStyle dialogStyle) {
             return _SimpleBooleanDialog(message, string.Empty, dialogStyle);
         }
 
+        /// <summary>
+        /// Displays a message with a title allowing the choice of two responses
+        /// as dictated by the dialogStyle parameter.
+        /// </summary>
+        /// <param name="message">The message to display.</param>
+        /// <param name="title">The title of the dialog.</param>
+        /// <param name="dialogStyle">
+        /// A SimpleBooleanDialogStyle that determines which choices appear.
+        /// </param>
+        /// <returns>True if accepted, false otherwise.</returns>
+        /// <exception cref="InvalidOperationException">
+        /// A dialog handler has not been registered.
+        /// </exception>
         public static bool SimpleBooleanDialog(string message, string title, SimpleBooleanDialogStyle dialogStyle) {
             var simpleBooleanDialog = _SimpleBooleanDialog;
             if (simpleBooleanDialog != null) {
@@ -151,6 +194,19 @@ namespace VMUtil {
             throw new InvalidOperationException("A dialog expecting a return value must be registered before use.");
         }
 
+        /// <summary>
+        /// Registers a function used to display a message and return a value
+        /// representing the response.
+        /// </summary>
+        /// <param name="simpleBooleanDialog">
+        /// A function which takes a message, title, and style, displays the
+        /// message, and returns the response chosen.
+        /// </param>
+        /// <remarks>
+        /// This method is used by code with knowledge of the user interface to display
+        /// a simple message dialog when code without knowledge of the user interface
+        /// needs to display a message.
+        /// </remarks>
         public static void RegisterSimpleBooleanDialog(Func<string, string, SimpleBooleanDialogStyle, Boolean> simpleBooleanDialog){
             _SimpleBooleanDialog = simpleBooleanDialog;
         }
@@ -162,8 +218,18 @@ namespace VMUtil {
 
     }
     
+    /// <summary>
+    /// The SimpleBooleanDialogStyle values determine whether to display
+    /// Ok and Cancel or Yes and No as its boolean choices.
+    /// </summary>
     public enum SimpleBooleanDialogStyle{
+        /// <summary>
+        /// Display Ok and Cancel options.
+        /// </summary>
         OkCancel,
+        /// <summary>
+        /// Display Yes and No options.
+        /// </summary>
         YesNo,
     }
 }
