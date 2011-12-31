@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-namespace WpfUtil.Utilities {
+namespace VMUtil {
 
     /// <summary>
     /// The DialogServices class is used to allow code to display various dialogs without
